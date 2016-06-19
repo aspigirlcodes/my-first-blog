@@ -10,4 +10,7 @@ urlpatterns = [
     url(r'^drafts/$', views.post_draft_list, name='post_draft_list'),
     url(r'^post/(?P<pk>\d+)/publish/$', views.post_publish, name='post_publish'),
     url(r'^post/(?P<pk>\d+)/remove/$', views.post_remove, name='post_remove'),
+    url(r'^faq/new/$', views.faq_new, name='faq_new'),
+    url(r'^faq/(?P<pk>\d+)/$', views.faq_edit, name='faq_edit'),
+    url(r'^faq/$', views.faq_list, name='faq_list'),
 ]

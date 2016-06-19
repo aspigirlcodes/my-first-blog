@@ -1,0 +1,128 @@
+Changing Layout
+================
+1 change title
+
+in base.html
+
+<head>
+<title>Wondermind|Blog</title>
+...
+</head>
+
+and
+
+<div class="page-header">
+    ...
+    <h1><a href="/">Wondermind</a></h1>
+</div>
+
+2 change font
+
+Inside static make a new folder called fonts.
+Put the ttf file inside
+
+delete the line:
+<link href='//fonts.googleapis.com/css?family=Lobster&subset=latin,latin-ext' rel='stylesheet' type='text/css'>
+from base.html
+
+in blog.css add
+
+@font-face {
+  font-family: 'desyrel';
+  src: url('../fonts/desyrel.ttf');
+}
+
+and change the place where the lobster font is used to use the desyrel font:
+h1, h2, h3, h4 {
+    font-family: 'desyrel';
+}
+
+3 Add own graphics
+
+header image
+http://rsizr.com/
+licence
+
+favicon
+
+
+4 Extending the models
+
+4.1. Adding an faq model and views
+
+class Faq(models.Model):
+    question = models.CharField(max_length=500)
+    answer = models.TextField()
+    is_visible = models.BooleanField(default=True)
+
+    def __str__(self):
+        return self.question
+
+python manage.py makemigrations --dry-run
+  Migrations for 'blog'
+    0002_faq.py
+      - Create model Faq
+
+python manage.py makemigrations
+python manage.py migrate
+  Operations to perform:
+  ...
+  ... OK
+
+
+def faq_list(request):
+    faqs = Faq.objects.filter(is_visible=True)
+    return render(request, 'blog/faq_list.html', {'faqs': faqs})
+
+
+{% extends 'blog/base.html' %}
+
+{% block content %}
+    {% if user.is_authenticated %}
+        <a href="{% url 'faq_new' %}" class="top-menu"><span class="glyphicon glyphicon-plus"></span></a>
+    {% endif %}
+    {% for faq in faqs %}
+        <div class="faq">
+            <h1>{{ faq.question }}</h1>
+            {% if user.is_authenticated %}
+                <a class="btn btn-default" href="{% url 'faq_edit' pk=faq.pk %}"><span class="glyphicon glyphicon-pencil"></span></a>
+            {% endif %}
+            <p>{{ faq.answer|linebreaks }}</p>
+        </div>
+    {% endfor %}
+{% endblock %}
+
+url(r'^faq/$', views.faq_list, name='faq_list'),
+
+A new and an edit view:
+@login_required
+def faq_new(request):
+    if request.method == "POST":
+        form = FaqForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('faq_list')
+    else:
+        form = FaqForm()
+    return render(request, 'blog/faq_edit.html', {'form': form})
+
+
+@login_required
+def faq_edit(request, pk):
+    faq = get_object_or_404(Faq, pk=pk)
+    if request.method == "POST":
+        form = FaqForm(request.POST, instance=faq)
+        if form.is_valid():
+            form.save()
+            return redirect('faq_list')
+    else:
+        form = FaqForm(instance=faq)
+    return render(request, 'blog/faq_edit.html', {'form': form})
+
+a form:
+
+class FaqForm(forms.ModelForm):
+
+    class Meta:
+        model = Faq
+        fields = ('question', 'answer','is_visible')

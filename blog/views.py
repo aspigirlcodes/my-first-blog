@@ -1,8 +1,8 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
 from django.contrib.auth.decorators import login_required
-from .models import Post
-from .forms import PostForm
+from .models import Post, Faq
+from .forms import PostForm, FaqForm
 # Create your views here.
 
 
@@ -61,3 +61,33 @@ def post_remove(request, pk):
     post = get_object_or_404(Post, pk=pk)
     post.delete()
     return redirect('blog.views.post_list')
+
+
+def faq_list(request):
+    faqs = Faq.objects.filter(is_visible=True)
+    return render(request, 'blog/faq_list.html', {'faqs': faqs})
+
+
+@login_required
+def faq_new(request):
+    if request.method == "POST":
+        form = FaqForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('faq_list')
+    else:
+        form = FaqForm()
+    return render(request, 'blog/faq_edit.html', {'form': form})
+
+
+@login_required
+def faq_edit(request, pk):
+    faq = get_object_or_404(Faq, pk=pk)
+    if request.method == "POST":
+        form = FaqForm(request.POST, instance=faq)
+        if form.is_valid():
+            form.save()
+            return redirect('faq_list')
+    else:
+        form = FaqForm(instance=faq)
+    return render(request, 'blog/faq_edit.html', {'form': form})
