@@ -129,22 +129,71 @@ class FaqForm(forms.ModelForm):
 
 displaying invisible faqs to logged in user
 
-        {% if faq.is_visible %}
-        <div class="faq">
-            <h1>{{ faq.question }}</h1>
-            {% if user.is_authenticated %}
-                <a class="btn btn-default" href="{% url 'faq_edit' pk=faq.pk %}"><span class="glyphicon glyphicon-pencil"></span></a>
-            {% endif %}
-            <p>{{ faq.answer|linebreaks }}</p>
-        </div>
-        {% elif user.is_authenticated %}
-        <div class="faq-invisible">
-            <h1>{{ faq.question }}</h1>
+def faq_list(request):
+    faqs = Faq.objects.all()
+    return render(request, 'blog/faq_list.html', {'faqs': faqs})
+
+
+    {% if faq.is_visible %}
+    <div class="faq">
+        <h1>{{ faq.question }}</h1>
+        {% if user.is_authenticated %}
             <a class="btn btn-default" href="{% url 'faq_edit' pk=faq.pk %}"><span class="glyphicon glyphicon-pencil"></span></a>
-            <p>{{ faq.answer|linebreaks }}</p>
-        </div>
         {% endif %}
+        <p>{{ faq.answer|linebreaks }}</p>
+    </div>
+    {% elif user.is_authenticated %}
+    <div class="faq-invisible">
+        <h1>{{ faq.question }}</h1>
+        <a class="btn btn-default" href="{% url 'faq_edit' pk=faq.pk %}"><span class="glyphicon glyphicon-pencil"></span></a>
+        <p>{{ faq.answer|linebreaks }}</p>
+    </div>
+    {% endif %}
 
 .faq-invisible p, .faq-invisible h1, .faq-invisible a{
     color: #C0C0C0;
 }
+
+
+Adding categories to posts
+requirements.txt
+django~=1.9.0
+django-select-multiple-field~=0.4.2
+
+pip install -r requirements.txt
+
+class Post(models.Model):
+    ASPI = 'a'
+    CODE = 'c'
+    CATEGORIES = (
+        (ASPI, 'Aspigirl'),
+        (CODE, 'Programming')
+    )
+
+    author = models.ForeignKey('auth.User')
+    title = models.CharField(max_length=200)
+    text = models.TextField()
+    created_date = models.DateTimeField(default=timezone.now)
+    published_date = models.DateTimeField(blank=True, null=True)
+    category = SelectMultipleField(max_length=10, choices=CATEGORIES, default=ASPI)
+    ...
+
+python manage.py makemigrations
+python manage.py migrate
+
+in PostForm:
+fields = ('title', 'text', 'category')
+
+make 2 new listviews:
+
+def aspi_post_list(request):
+    posts = Post.objects.filter(category__contains=Post.ASPI, published_date__lte=timezone.now()).order_by('published_date')
+    return render(request, 'blog/post_list.html', {'posts': posts})
+
+
+def code_post_list(request):
+    posts = Post.objects.filter(category__contains=Post.CODE, published_date__lte=timezone.now()).order_by('published_date')
+    return render(request, 'blog/post_list.html', {'posts': posts})
+
+url(r'^aspi/$', views.aspi_post_list, name='aspi_post_list'),
+url(r'^code/$', views.code_post_list, name='code_post_list'),

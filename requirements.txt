@@ -1,0 +1,2 @@
+django~=1.9.0
+django-select-multiple-field~=0.4.2
