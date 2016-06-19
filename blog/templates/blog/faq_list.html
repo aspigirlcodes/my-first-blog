@@ -5,6 +5,7 @@
         <a href="{% url 'faq_new' %}" class="top-menu"><span class="glyphicon glyphicon-plus"></span></a>
     {% endif %}
     {% for faq in faqs %}
+        {% if faq.is_visible %}
         <div class="faq">
             <h1>{{ faq.question }}</h1>
             {% if user.is_authenticated %}
@@ -12,5 +13,12 @@
             {% endif %}
             <p>{{ faq.answer|linebreaks }}</p>
         </div>
+        {% elif user.is_authenticated %}
+        <div class="faq-invisible">
+            <h1>{{ faq.question }}</h1>
+            <a class="btn btn-default" href="{% url 'faq_edit' pk=faq.pk %}"><span class="glyphicon glyphicon-pencil"></span></a>
+            <p>{{ faq.answer|linebreaks }}</p>
+        </div>
+        {% endif %}
     {% endfor %}
 {% endblock %}

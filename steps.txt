@@ -126,3 +126,25 @@ class FaqForm(forms.ModelForm):
     class Meta:
         model = Faq
         fields = ('question', 'answer','is_visible')
+
+displaying invisible faqs to logged in user
+
+        {% if faq.is_visible %}
+        <div class="faq">
+            <h1>{{ faq.question }}</h1>
+            {% if user.is_authenticated %}
+                <a class="btn btn-default" href="{% url 'faq_edit' pk=faq.pk %}"><span class="glyphicon glyphicon-pencil"></span></a>
+            {% endif %}
+            <p>{{ faq.answer|linebreaks }}</p>
+        </div>
+        {% elif user.is_authenticated %}
+        <div class="faq-invisible">
+            <h1>{{ faq.question }}</h1>
+            <a class="btn btn-default" href="{% url 'faq_edit' pk=faq.pk %}"><span class="glyphicon glyphicon-pencil"></span></a>
+            <p>{{ faq.answer|linebreaks }}</p>
+        </div>
+        {% endif %}
+
+.faq-invisible p, .faq-invisible h1, .faq-invisible a{
+    color: #C0C0C0;
+}

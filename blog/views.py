@@ -64,7 +64,7 @@ def post_remove(request, pk):
 
 
 def faq_list(request):
-    faqs = Faq.objects.filter(is_visible=True)
+    faqs = Faq.objects.all()
     return render(request, 'blog/faq_list.html', {'faqs': faqs})
 
 
