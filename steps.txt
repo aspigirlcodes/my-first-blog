@@ -197,3 +197,8 @@ def code_post_list(request):
 
 url(r'^aspi/$', views.aspi_post_list, name='aspi_post_list'),
 url(r'^code/$', views.code_post_list, name='code_post_list'),
+
+
+5 adding a real navbar
+
+example: 
